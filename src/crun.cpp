@@ -87,8 +87,36 @@ void print_help() {
     );
 }
 
-void print_version() {
-    wprintf(L"crun 0.7.0\n");
+const wchar_t* CRUN_VERSION_STR = L"0.9.0";
+
+void print_version(const wchar_t* compiler_name_arg) {
+    wprintf(L"crun version %ls\n", CRUN_VERSION_STR);
+
+    // --compiler オプションで指定されたコンパイラ名、またはデフォルトの "gcc" を使用
+    const wchar_t* compiler_to_check = (compiler_name_arg && wcslen(compiler_name_arg) > 0) ? compiler_name_arg : L"gcc";
+
+    wchar_t compiler_exe_name[20];
+    swprintf_s(compiler_exe_name, 20, L"%s.exe", compiler_to_check);
+
+    wchar_t compiler_path[MAX_PATH];
+    if (find_executable_in_path(compiler_exe_name, compiler_path, MAX_PATH)) {
+        wchar_t command[MAX_PATH + 20];
+        swprintf_s(command, MAX_PATH + 20, L"\"%s\" --version", compiler_path);
+        
+        wchar_t* output = NULL;
+            if (run_process_and_capture_output(command, &output) && output) {
+                wchar_t* context = NULL;
+                wchar_t* first_line = wcstok_s(output, L"\r\n", &context);
+                if (first_line) {
+                    wprintf(L"%ls\n", first_line);
+                }
+                free(output);
+            } else {
+                fwprintf_err(L"Could not get version information from %s.\n", compiler_exe_name);
+            }
+    } else {
+        fwprintf_err(L"Compiler '%s' not found in PATH.\n", compiler_exe_name);
+    }
 }
 
 // --- Main Entry Point ---
@@ -110,6 +138,23 @@ int main() {
         LocalFree(argv);
         return 0;
     }
+
+    // --- Pre-parse for --version and --compiler ---
+    // --- --version と --compiler のための事前解析 ---
+    const wchar_t* specified_compiler = L"";
+    for (int i = 1; i < argc - 1; ++i) {
+        if (wcscmp(argv[i], L"--compiler") == 0) {
+            specified_compiler = argv[i + 1];
+            break;
+        }
+    }
+
+    if (argc >= 2 && wcscmp(argv[1], L"--version") == 0) {
+        print_version(specified_compiler);
+        LocalFree(argv);
+        return 0;
+    }
+
 
     if (argc < 2) {
         print_help();
@@ -153,9 +198,10 @@ int main() {
         }
 
         if (wcscmp(arg, L"--help") == 0) { print_help(); free(opts.source_files); free(opts.program_args); LocalFree(argv); return 0; }
-        if (wcscmp(arg, L"--version") == 0) { print_version(); free(opts.source_files); free(opts.program_args); LocalFree(argv); return 0; }
+        if (wcscmp(arg, L"--version") == 0) { /* Handled above */ continue; }
         if (wcscmp(arg, L"--keep-temp") == 0) { opts.keep_temp = TRUE; continue; }
         if (wcscmp(arg, L"--verbose") == 0 || wcscmp(arg, L"-v") == 0) { opts.verbose = TRUE; continue; }
+
         if (wcscmp(arg, L"--time") == 0) { opts.measure_time = TRUE; continue; }
         if (wcscmp(arg, L"--wall") == 0) { opts.warnings_all = TRUE; continue; }
         if (wcscmp(arg, L"--debug") == 0 || wcscmp(arg, L"-g") == 0) { opts.debug_build = TRUE; continue; }
@@ -282,15 +328,24 @@ int main() {
         GetFullPathNameW(opts.source_files[i], MAX_PATH, full_path, NULL);
         wchar_t* source_content = NULL;
         if (read_file_content_wide(full_path, &source_content)) {
-            // Windows APIヘッダのインクルードをチェック
-            if (wcsstr(source_content, L"<windows.h>")) { wcscat_s(auto_flags, 256, L" -lkernel32 -luser32 -lshell32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32"); }
-            if (wcsstr(source_content, L"<winsock2.h>") || wcsstr(source_content, L"<winsock.h>")) { wcscat_s(auto_flags, 256, L" -lws2_32"); }
-            if (wcsstr(source_content, L"<shlobj.h>")) { wcscat_s(auto_flags, 256, L" -lole32"); }
-            if (wcsstr(source_content, L"<dwmapi.h>")) { wcscat_s(auto_flags, 256, L" -ldwmapi"); }
+            // Windows APIヘッダのインクルードをチェック (ファイル名のみで検索)
+            if (wcsstr(source_content, L"windows.h")) { wcscat_s(auto_flags, 256, L" -lkernel32 -luser32 -lshell32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32"); }
+            if (wcsstr(source_content, L"winsock2.h") || wcsstr(source_content, L"winsock.h")) { wcscat_s(auto_flags, 256, L" -lws2_32"); }
+            if (wcsstr(source_content, L"shlobj.h") || wcsstr(source_content, L"ole32.h")) { wcscat_s(auto_flags, 256, L" -lole32"); }
+            if (wcsstr(source_content, L"dwmapi.h")) { wcscat_s(auto_flags, 256, L" -ldwmapi"); }
+            if (wcsstr(source_content, L"wininet.h")) { wcscat_s(auto_flags, 256, L" -lwininet"); }
+            if (wcsstr(source_content, L"comctl32.h")) { wcscat_s(auto_flags, 256, L" -lcomctl32"); }
+            if (wcsstr(source_content, L"version.h")) { wcscat_s(auto_flags, 256, L" -lversion"); }
+            if (wcsstr(source_content, L"rpc.h")) { wcscat_s(auto_flags, 256, L" -lrpcrt4"); }
+            if (wcsstr(source_content, L"bcrypt.h")) { wcscat_s(auto_flags, 256, L" -lbcrypt"); }
+            if (wcsstr(source_content, L"ncrypt.h")) { wcscat_s(auto_flags, 256, L" -lncrypt"); }
+            if (wcsstr(source_content, L"d3d11.h")) { wcscat_s(auto_flags, 256, L" -ld3d11"); }
+            if (wcsstr(source_content, L"d2d1.h")) { wcscat_s(auto_flags, 256, L" -ld2d1"); }
+            if (wcsstr(source_content, L"dwrite.h")) { wcscat_s(auto_flags, 256, L" -ldwrite"); }
 
             // 標準ライブラリヘッダのインクルードをチェック
-            if (wcsstr(source_content, L"<pthread.h>")) { wcscat_s(auto_flags, 256, L" -lpthread"); }
-            if (wcsstr(source_content, L"<math.h>")) { wcscat_s(auto_flags, 256, L" -lm"); }
+            if (wcsstr(source_content, L"pthread.h")) { wcscat_s(auto_flags, 256, L" -lpthread"); }
+            if (wcsstr(source_content, L"math.h")) { wcscat_s(auto_flags, 256, L" -lm"); }
 
             free(source_content); // メモリを解放
         } else {
