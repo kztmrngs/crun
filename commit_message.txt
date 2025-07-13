@@ -1,0 +1,5 @@
+docs: Update GEMINI.md with detailed build process
+
+- Added comprehensive documentation for development/test builds and release builds using both GCC and Clang.
+- Clarified the roles of `crun_test.exe`, `crun_test_clang.exe`, `crun_gcc.exe`, and `crun_clang.exe`.
+- Explained the final placement of `crun.exe` as a symbolic link or copy of `crun_clang.exe`.
