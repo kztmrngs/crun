@@ -15,7 +15,7 @@ TARGET_TEST_CLANG = $(BIN_DIR)/crun_test_clang.exe
 TARGET_FINAL = $(BIN_DIR)/crun.exe
 
 # Common flags
-LDFLAGS = -lkernel32 -luser32 -lshell32 -lmsvcrt -static
+LDFLAGS = -lkernel32 -luser32 -lshell32 -lmsvcrt -lshlwapi -static
 COMMON_FLAGS = -s -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -Wl,--gc-sections,--strip-all
 
 # Compiler-specific optimization flags

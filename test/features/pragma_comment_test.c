@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "test_header.h"
+#include "pragma_comment_test.h"
 
 int main() {
     BOOL enabled = FALSE;

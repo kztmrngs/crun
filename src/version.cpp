@@ -29,9 +29,9 @@ void print_version(const wchar_t* compiler_name_arg) {
                 }
                 free(output);
             } else {
-                fwprintf_err(L"Could not get version information from %s.\n", compiler_exe_name);
+                fwprintf_err(L"%s からバージョン情報を取得できませんでした。\n", compiler_exe_name);
             }
     } else {
-        fwprintf_err(L"Compiler '%s' not found in PATH.\n", compiler_exe_name);
+        fwprintf_err(L"コンパイラ '%s' がPATHに見つかりません。\n", compiler_exe_name);
     }
 }
