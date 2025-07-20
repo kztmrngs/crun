@@ -1,9 +1,11 @@
 # Compilers
 CXX_GCC = g++
 CXX_CLANG = clang++
+WINDRES = windres
 
 # Source files and resource file
 SRCS = src/crun.cpp src/options.cpp src/compiler.cpp src/utils.cpp src/version.cpp
+RES_SRC = res/crun.rc
 RES = res/crun.res
 
 # Output directory and target executables
@@ -27,6 +29,11 @@ CLANG_OPT_FLAGS = -Oz
 
 # Default target
 all: gcc clang link
+
+# Resource compilation
+$(RES): $(RES_SRC)
+	@echo "Compiling resources..."
+	$(WINDRES) -i $(RES_SRC) -o $(RES) --output-format=coff
 
 # Release builds
 gcc: $(TARGET_GCC)
@@ -59,9 +66,10 @@ $(TARGET_TEST_CLANG): $(SRCS) $(RES)
 # Create final executable
 link: $(TARGET_CLANG)
 	@echo "Creating final crun.exe from Clang build..."
-	@copy /Y "$(subst /,\,$(TARGET_CLANG))" "$(subst /,\,$(TARGET_FINAL))" > NUL
+	@cp -f $(TARGET_CLANG) $(TARGET_FINAL)
 
 # Clean up build files
 clean:
 	@echo "Cleaning up build files..."
-	@if exist "$(subst /,\,$(BIN_DIR))\\*.exe" del /Q "$(subst /,\,$(BIN_DIR))\\*.exe"
+	@rm -f $(subst \,/,$(TARGET_GCC)) $(subst \,/,$(TARGET_CLANG)) $(subst \,/,$(TARGET_TEST_GCC)) $(subst \,/,$(TARGET_TEST_CLANG)) $(subst \,/,$(TARGET_FINAL)) $(subst \,/,$(RES))
+

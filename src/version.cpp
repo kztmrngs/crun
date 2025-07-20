@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-const wchar_t* CRUN_VERSION_STR = L"0.9.0";
+const wchar_t* CRUN_VERSION_STR = L"1.0.0";
 
 void print_version(const wchar_t* compiler_name_arg) {
     wprintf(L"crun version %ls\n", CRUN_VERSION_STR);

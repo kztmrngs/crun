@@ -8,15 +8,20 @@ Pythonのような手軽さでC/C++プログラムを試したい方に最適で
 ## 特徴
 
 - **複数ソースファイル対応**: `.c`または`.cpp`ファイルを複数指定して、まとめてビルド＆実行できます。
-- **インクルード内容を解析し、必要なコンパイラオプションを自動追加**
-- **ヘッダに応じたライブラリの自動リンク**: `windows.h`, `pthread.h`などのヘッダに応じて、必要なライブラリを自動的にリンクします。
+- **インクルード内容を再帰的に解析し、必要なライブラリを自動リンク**:
+  - `#include <windows.h>` -> `-lkernel32 -luser32 ...`
+  - `#include <d3d11.h>` -> `-ld3d11`
+  - `#include <gl/gl.h>` -> `-lopengl32`
+  - `#include <pthread.h>` -> `-lpthread`
+  - その他、DirectX, GDI+, Winsockなど多数のWindows APIライブラリに対応。
+- **`#pragma comment(lib, "...")` に対応**: ソースコード内のプラグマを解釈し、ライブラリをリンクします。
 - **実行ファイルサイズを最小化する最適化オプションを自動適用**
 - **警告オプションのサポート**: `--wall`オプションでコンパイラの警告をすべて有効化できます。
 - **デバッグビルドのサポート**: `--debug`または`-g`オプションでデバッグビルドを有効化できます。
 - **詳細出力**: `--verbose`または`-v`オプションでコンパイルコマンドなどの詳細な出力を表示できます。
 - MinGW (gcc/g++) または Clang を利用（PATHが通っている必要あり）
 - 一時ディレクトリでビルドし、実行後に自動削除（`--keep-temp`で保持可能）
-- 追加のコンパイルオプションや詳細出力（`--verbose`）もサポート
+- 追加のコンパイルオプション (`--cflags`) やライブラリ (`--libs`) もサポート
 - プログラム引数の指定も可能
 - 標準入出力・エラーはそのまま親プロセスに引き継がれます
 
@@ -51,15 +56,15 @@ crun hello.c
 crun --compiler clang app.cpp arg1 arg2 --verbose
 
 # 複数ファイル
-crun main.c utils.c -o my_app
-crun game.cpp player.cpp enemy.cpp --debug
+crun main.c utils.c
 
 # ライブラリの自動リンク
-crun math_app.c             # math.h をインクルードしていれば -lm を自動追加
+crun direct2d_app.cpp       # d2d1.h をインクルードしていれば -ld2d1 を自動追加
 crun network_app.c          # winsock2.h をインクルードしていれば -lws2_32 を自動追加
+crun pragma_test.c          # #pragma comment(lib, "user32") を解釈して -luser32 を追加
 
 # その他のオプション
-crun custom.c --cflags "-O3 -DNDEBUG"
+crun custom.c --cflags "-O3 -DNDEBUG" --libs "-lcustom"
 crun test.cpp --keep-temp
 crun benchmark.cpp --time
 crun --clean
@@ -72,9 +77,10 @@ crun --clean
 | オプション                | 説明                                    |
 |--------------------------|-----------------------------------------|
 | `--help`                 | ヘルプを表示                            |
-| `--version`              | バージョン情報を表示 (v0.7.0)           |
+| `--version`              | バージョン情報を表示 (v1.0.0)           |
 | `--compiler <name>`      | 使用するコンパイラを指定します (`gcc` or `clang`)。デフォルトは `gcc` です。 |
 | `--cflags "<flags>"`     | 追加のコンパイルフラグを指定。自動検出されたフラグを上書きします。 |
+| `--libs "<libs>"`        | 追加でリンクするライブラリを指定します (例: `"-luser32 -lgdi32"`)。 |
 | `--keep-temp`            | 実行後も一時ディレクトリを削除しない     |
 | `--verbose`, `-v`        | 詳細な出力を有効化                       |
 | `--time`                 | プログラムの実行時間を計測・表示         |
@@ -83,7 +89,7 @@ crun --clean
 | `--clean`                | カレントディレクトリの一時ディレクトリをすべて削除 |
 
 - オプションは**どの位置でも指定可能**です（例: `crun --verbose hello.c` もOK）。
-- `--cflags`の直後にフラグ文字列を指定してください（例: `--cflags "-Wall -O2"`）。
+- `--cflags` や `--libs` の直後にフラグ文字列を指定してください（例: `--cflags "-Wall -O2"`）。
 
 ---
 
@@ -93,9 +99,9 @@ crun --clean
 
 - **基本最適化**: `-O2 -s` (実行ファイルのサイズと速度を両立)
 - **デバッグビルド**: `--debug` 指定時は `-g`
-- **ライブラリ自動リンク**: ソースコードが特定のヘッダファイル（例: `pthread.h`, `math.h`, `windows.h`, `winsock2.h`）をインクルードしている場合、対応するライブラリリンクオプション（例: `-lpthread`, `-lm`, `-lkernel32`, `-lws2_32`）を自動的に追加します。
+- **ライブラリ自動リンク**: ソースコードが特定のヘッダファイル（例: `pthread.h`, `math.h`, `windows.h`, `d3d11.h`, `winsock2.h`）をインクルードしている場合や、`#pragma comment(lib, ...)` が記述されている場合、対応するライブラリリンクオプション（例: `-lpthread`, `-lm`, `-lkernel32`, `-ld3d11`, `-lws2_32`）を自動的に追加します。
 
-これらの自動オプションは、`--cflags`オプションで上書きすることが可能です。
+これらの自動オプションは、`--cflags` や `--libs` オプションで追加・上書きすることが可能です。
 
 ---
 
@@ -103,10 +109,11 @@ crun --clean
 
 1. ソースファイルの存在と拡張子（`.c`/`.cpp`）をチェック
 2. 一時ディレクトリを作成し、そこにビルド
-3. **ソースファイルのインクルード内容を解析し、必要なコンパイラオプションを自動決定**
-4. MinGWの`gcc.exe`/`g++.exe`またはClangの`clang.exe`/`clang++.exe`でコンパイル
-5. 実行ファイルを生成し、指定した引数で実行
-6. 終了後、一時ディレクトリを自動削除（`--keep-temp`指定時は保持）
+3. **ソースファイルと、そこから `#include` されているヘッダファイルを再帰的に解析**
+4. **`#include` や `#pragma comment` の内容から、必要なコンパイラオプションとリンクするライブラリを自動決定**
+5. MinGWの`gcc.exe`/`g++.exe`またはClangの`clang.exe`/`clang++.exe`でコンパイル
+6. 実行ファイルを生成し、指定した引数で実行
+7. 終了後、一時ディレクトリを自動削除（`--keep-temp`指定時は保持）
 
 ---
 

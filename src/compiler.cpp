@@ -233,7 +233,10 @@ BOOL build_compile_command(const ProgramOptions* opts, const wchar_t* executable
             fwprintf_err(L"エラー: ソースファイルのフルパスを取得できませんでした: %s\n", opts->source_files[i]);
             return FALSE;
         }
-        wcscat_s(all_source_files_str, _countof(all_source_files_str), L" \"");
+        if (i > 0) {
+            wcscat_s(all_source_files_str, _countof(all_source_files_str), L" ");
+        }
+        wcscat_s(all_source_files_str, _countof(all_source_files_str), L"\"");
         wcscat_s(all_source_files_str, _countof(all_source_files_str), full_path);
         wcscat_s(all_source_files_str, _countof(all_source_files_str), L"\"");
     }
@@ -252,11 +255,15 @@ BOOL build_compile_command(const ProgramOptions* opts, const wchar_t* executable
         wcscat_s(auto_flags, _countof(auto_flags), L" -Wall");
     }
 
-    swprintf_s(command, command_size, L"%s %s %s %s -o \"%s\"",
+    const wchar_t* user_flags = opts->compiler_flags ? opts->compiler_flags : L"";
+    const wchar_t* user_libs = opts->user_libraries ? opts->user_libraries : L"";
+
+    swprintf_s(command, command_size, L"\"%s\" %s %s %s %s -o \"%s\"",
                compiler_path,
                all_source_files_str,
                auto_flags,
-               opts->compiler_flags,
+               user_flags,
+               user_libs,
                executable_path);
 
     return TRUE;
