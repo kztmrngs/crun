@@ -121,7 +121,16 @@ int main() {
     }
 
     if (opts.verbose) wprintf(L"--- Compiling ---\nCommand: %s\n", compile_command);
-    if (!run_process(compile_command, opts.verbose)) {
+    
+    wchar_t* compile_output = NULL;
+    BOOL compile_success = run_process_and_capture_output(compile_command, &compile_output);
+
+    if (compile_output) {
+        wprintf(L"%s", compile_output); // コンパイラの出力を表示
+        free(compile_output);
+    }
+
+    if (!compile_success) {
         fwprintf_err(L"Compilation failed.\n");
         if (!opts.keep_temp) remove_directory_recursively(temp_dir);
         free_options(&opts);
