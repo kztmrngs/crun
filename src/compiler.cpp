@@ -17,33 +17,47 @@ static const HeaderToLib lib_map[] = {
     // コアWindowsライブラリ (Core Windows Libraries)
     {L"windows.h", L"-lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid"},
     {L"winbase.h", L"-lkernel32"}, {L"winnt.h", L"-lkernel32"}, {L"libloaderapi.h", L"-lkernel32"},
+    {L"fileapi.h", L"-lkernel32"}, {L"processthreadsapi.h", L"-lkernel32"}, {L"synchapi.h", L"-lkernel32"},
+    {L"handleapi.h", L"-lkernel32"}, {L"errhandlingapi.h", L"-lkernel32"}, {L"datetimeapi.h", L"-lkernel32"},
+    {L"timezoneapi.h", L"-lkernel32"}, {L"wow64apiset.h", L"-lkernel32"}, {L"memoryapi.h", L"-lkernel32"},
+    {L"sysinfoapi.h", L"-lkernel32"}, {L"securitybaseapi.h", L"-ladvapi32"}, {L"debugapi.h", L"-lkernel32"},
+    {L"heapapi.h", L"-lkernel32"}, {L"ioapiset.h", L"-lkernel32"}, {L"namedpipeapi.h", L"-lkernel32"},
+    {L"processenv.h", L"-lkernel32"}, {L"profileapi.h", L"-lkernel32"}, {L"utilapiset.h", L"-lkernel32"},
     {L"winuser.h", L"-luser32"}, {L"wingdi.h", L"-lgdi32"}, {L"winreg.h", L"-ladvapi32"},
     {L"winsvc.h", L"-ladvapi32"}, {L"advapi32.h", L"-ladvapi32"}, {L"cfgmgr32.h", L"-lcfgmgr32"},
     {L"devguid.h", L"-ldevguid"}, {L"devobj.h", L"-ldevobj"}, {L"userenv.h", L"-luserenv"},
     {L"wer.h", L"-lwer"}, {L"winspool.h", L"-lwinspool"}, {L"version.h", L"-lversion"},
+    {L"winioctl.h", L"-lkernel32"},
 
     // シェル (Shell)
-    {L"shellapi.h", L"-lshell32"}, {L"shlobj.h", L"-lole32 -lshell32"}, {L"shcore.h", L"-lshcore"},
-    {L"shlwapi.h", L"-lshlwapi"}, {L"propsys.h", L"-lpropsys"},
-    {L"shellscalingapi.h", L"-lshellscalingapi"},
+    {L"shellapi.h", L"-lshell32"}, {L"shlobj.h", L"-lole32 -lshell32"}, {L"shlwapi.h", L"-lshlwapi"},
+    {L"shcore.h", L"-lshcore"}, {L"propsys.h", L"-lpropsys"}, {L"comcat.h", L"-lole32"},
+    {L"shellscalingapi.h", L"-lshcore"}, // or -lshellscalingapi in some SDKs
+    {L"pathcch.h", L"-lpathcch"},
 
     // COM, OLE, ActiveX
-    {L"ole32.h", L"-lole32"}, {L"oleauto.h", L"-loleaut32"}, {L"combaseapi.h", L"-lole32"},
-    {L"comdlg32.h", L"-lcomdlg32"}, {L"commdlg.h", L"-lcomdlg32"}, {L"comctl32.h", L"-lcomctl32"},
-    {L"commctrl.h", L"-lcomctl32"}, {L"urlmon.h", L"-lurlmon"}, {L"uuid.h", L"-luuid"},
-    {L"ocidl.h", L"-lole32"}, {L"olectl.h", L"-lole32"},
+    {L"ole2.h", L"-lole32 -luser32 -lgdi32"}, // ole2.h includes ole.h
+    {L"ole.h", L"-lole32"}, {L"ole32.h", L"-lole32"}, {L"oleauto.h", L"-loleaut32"},
+    {L"combaseapi.h", L"-lole32"}, {L"objbase.h", L"-lole32"}, {L"objidl.h", L"-lole32"},
+    {L"comdef.h", L"-lole32"}, {L"comdlg32.h", L"-lcomdlg32"}, {L"commdlg.h", L"-lcomdlg32"},
+    {L"comctl32.h", L"-lcomctl32"}, {L"commctrl.h", L"-lcomctl32"}, {L"urlmon.h", L"-lurlmon"},
+    {L"uuid.h", L"-luuid"}, {L"ocidl.h", L"-lole32"}, {L"olectl.h", L"-lole32"},
+    {L"activscp.h", L"-lactivscp"},
 
     // ネットワーク (Networking)
     {L"winsock2.h", L"-lws2_32"}, {L"ws2tcpip.h", L"-lws2_32"}, {L"winsock.h", L"-lws2_32"},
+    {L"ws2ipdef.h", L"-lws2_32"}, {L"mstcpip.h", L"-lws2_32 -lnsi"},
     {L"wininet.h", L"-lwininet"}, {L"winhttp.h", L"-lwinhttp"}, {L"iphlpapi.h", L"-liphlpapi"},
     {L"dnsapi.h", L"-ldnsapi"}, {L"dhcpcsvc.h", L"-ldhcpcsvc"}, {L"mpr.h", L"-lmpr"},
-    {L"netapi32.h", L"-lnetapi32"}, {L"http.h", L"-lhttpapi"},
+    {L"netapi32.h", L"-lnetapi32"}, {L"http.h", L"-lhttpapi"}, {L"websocket.h", L"-lwebsocket"},
+    {L"rpcdce.h", L"-lrpcrt4"}, {L"netfw.h", L"-lole32"},
 
     // グラフィックスとマルチメディア (Graphics and Multimedia)
     // DirectX
     {L"d3d9.h", L"-ld3d9"}, {L"d3dx9.h", L"-ld3dx9"}, {L"d3d10.h", L"-ld3d10"},
-    {L"d3d11.h", L"-ld3d11"}, {L"d3d12.h", L"-ld3d12"}, {L"d3dcompiler.h", L"-ld3dcompiler"},
-    {L"d2d1.h", L"-ld2d1"}, {L"dwrite.h", L"-ldwrite"}, {L"dxgi.h", L"-ldxgi"},
+    {L"d3dx10.h", L"-ld3dx10"}, {L"d3d11.h", L"-ld3d11"}, {L"d3dx11.h", L"-ld3dx11"},
+    {L"d3d12.h", L"-ld3d12"}, {L"d3dcompiler.h", L"-ld3dcompiler"}, {L"d2d1.h", L"-ld2d1"},
+    {L"dwrite.h", L"-ldwrite"}, {L"dxgi.h", L"-ldxgi"}, {L"dinput.h", L"-ldinput"},
     {L"dinput8.h", L"-ldinput8"}, {L"dsound.h", L"-ldsound"}, {L"xaudio2.h", L"-lxaudio2"},
     {L"xinput.h", L"-lxinput"},
     // OpenGL
@@ -51,35 +65,40 @@ static const HeaderToLib lib_map[] = {
     {L"opengl.h", L"-lopengl32"}, {L"glu.h", L"-lglu32"},
     // Windows GDI & UI
     {L"gdiplus.h", L"-lgdiplus"}, {L"dwmapi.h", L"-ldwmapi"}, {L"uxtheme.h", L"-luxtheme"},
-    {L"imm32.h", L"-limm32"}, {L"dcomp.h", L"-ldcomp"},
+    {L"imm32.h", L"-limm32"}, {L"dcomp.h", L"-ldcomp"}, {L"textstor.h", L"-lmsctf"},
+    {L"magnification.h", L"-lmagnification"}, {L"richole.h", L"-lrichole"}, {L"richedit.h", L"-luser32"},
+    // Windows Imaging Component (WIC)
+    {L"wincodec.h", L"-lwincodec"},
     // Windows Media Foundation & Audio
     {L"mf.h", L"-lmf"}, {L"mfplat.h", L"-lmfplat"}, {L"mfreadwrite.h", L"-lmfreadwrite"},
     {L"mfuuid.h", L"-lmfuuid"}, {L"avrt.h", L"-lavrt"}, {L"vfw.h", L"-lvfw32"},
-    {L"winmm.h", L"-lwinmm"},
+    {L"winmm.h", L"-lwinmm"}, {L"mmdeviceapi.h", L"-lmmdevapi"}, {L"audioclient.h", L"-lmmdevapi"},
 
     // セキュリティ (Security)
     {L"rpc.h", L"-lrpcrt4"}, {L"bcrypt.h", L"-lbcrypt"}, {L"ncrypt.h", L"-lncrypt"},
     {L"setupapi.h", L"-lsetupapi"}, {L"wintrust.h", L"-lwintrust"}, {L"imagehlp.h", L"-limagehlp"},
     {L"psapi.h", L"-lpsapi"}, {L"cryptuiapi.h", L"-lcryptui"}, {L"wincrypt.h", L"-lcrypt32"},
-    {L"secur32.h", L"-lsecur32"}, {L"sspi.h", L"-lsecur32"},
+    {L"secur32.h", L"-lsecur32"}, {L"sspi.h", L"-lsecur32"}, {L"aclapi.h", L"-ladvapi32"},
+    {L"sddl.h", L"-ladvapi32"}, {L"credui.h", L"-lcredui"},
 
     // データアクセス (Data Access)
     {L"odbcinst.h", L"-lodbccp32"}, {L"sqlext.h", L"-lodbc32"}, {L"sql.h", L"-lodbc32"},
-    {L"oledb.h", L"-loledb"},
+    {L"oledb.h", L"-loledb"}, {L"adoint.h", L"-lole32"}, // For ADO
 
     // デバイスとプリンティング (Device and Printing)
-    {L"hidsdi.h", L"-lhid"}, {L"winusb.h", L"-lwinusb"}, {L"bluetoothapis.h", L"-lbthprops"},
-    {L"spoolss.h", L"-lwinspool"},
+    {L"hidsdi.h", L"-lhid"}, {L"winusb.h", L"-lwinusb"}, {L"usbioctl.h", L"-lwinusb"},
+    {L"bluetoothapis.h", L"-lbthprops"}, {L"spoolss.h", L"-lwinspool"},
 
     // 管理とWMI (Management and WMI)
-    {L"wbemidl.h", L"-lwbemuuid"}, {L"wmistr.h", L"-lwbemuuid"},
+    {L"wbemidl.h", L"-lwbemuuid"}, {L"wbemcli.h", L"-lwbemuuid"}, {L"wmistr.h", L"-lwbemuuid"},
 
     // その他 (Miscellaneous)
     {L"msi.h", L"-lmsi"}, {L"powrprof.h", L"-lpowrprof"}, {L"wtsapi32.h", L"-lwtsapi32"},
-    {L"virtdisk.h", L"-lvirtdisk"},
+    {L"virtdisk.h", L"-lvirtdisk"}, {L"fltdefs.h", L"-lfltlib"}, {L"ktmw32.h", L"-lktmw32"},
+    {L"dbghelp.h", L"-ldbghelp"}, {L"tlhelp32.h", L"-lkernel32"},
 
     // 標準ライブラリ (Standard Libraries - MinGW-specific)
-    {L"pthread.h", L"-lpthread"}, {L"math.h", L"-lm"},
+    {L"pthread.h", L"-lpthread"}, {L"math.h", L"-lm"}, {L"zlib.h", L"-lz"},
 };
 
 // --- ヘルパー関数 ---
