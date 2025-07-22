@@ -99,6 +99,16 @@ static const HeaderToLib lib_map[] = {
 
     // 標準ライブラリ (Standard Libraries - MinGW-specific)
     {L"pthread.h", L"-lpthread"}, {L"math.h", L"-lm"}, {L"zlib.h", L"-lz"},
+
+    // SIMD Intrinsics
+    {L"immintrin.h", L"-mavx2 -mfma"}, // AVX2 and FMA
+    {L"xmmintrin.h", L"-msse"}, // SSE
+    {L"emmintrin.h", L"-msse2"}, // SSE2
+    {L"pmmintrin.h", L"-msse3"}, // SSE3
+    {L"tmmintrin.h", L"-mssse3"}, // SSSE3
+    {L"smmintrin.h", L"-msse4.1"}, // SSE4.1
+    {L"nmmintrin.h", L"-msse4.2"}, // SSE4.2
+    {L"mmintrin.h", L"-mmmx"}, // MMX
 };
 
 // --- ヘルパー関数 ---
